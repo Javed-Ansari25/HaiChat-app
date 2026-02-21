@@ -10,9 +10,10 @@ const initSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: [
-      "http://localhost:5173",
-      "https://hai-chat-app.vercel.app"
-    ],
+        'http://localhost:5173',
+        'https://hai-chat-app.vercel.app',
+        'https://hai-chat-app-git-main-javedansari2k09-2089s-projects.vercel.app',
+      ],
       credentials: true,
     },
     pingTimeout: 60000,
@@ -21,10 +22,12 @@ const initSocket = (server) => {
   // Auth middleware for socket connections
   io.use(async (socket, next) => {
     try {
-      const token = socket.handshake.auth.token || socket.handshake.headers.cookie
-        ?.split(';')
-        .find(c => c.trim().startsWith('jwt='))
-        ?.split('=')[1];
+      const token =
+        socket.handshake.auth.token ||
+        socket.handshake.headers.cookie
+          ?.split(';')
+          .find((c) => c.trim().startsWith('jwt='))
+          ?.split('=')[1];
 
       if (!token) throw new Error('No token');
 
