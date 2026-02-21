@@ -9,7 +9,10 @@ const onlineUsers = new Map();
 const initSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || 'https://hai-chat-app.vercel.app',
+      origin: [
+      "http://localhost:5173",
+      "https://hai-chat-app.vercel.app"
+    ],
       credentials: true,
     },
     pingTimeout: 60000,
