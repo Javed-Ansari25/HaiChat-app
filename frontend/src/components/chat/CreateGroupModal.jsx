@@ -60,20 +60,37 @@ const CreateGroupModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => dispatch(toggleCreateGroup())} />
-      <div className="relative bg-chat-header rounded-2xl w-full max-w-md shadow-2xl border border-chat-border/30 fade-in">
-        {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-chat-border/20">
-          <h2 className="text-base font-semibold text-chat-text flex-1">Create Group</h2>
-          <button onClick={() => dispatch(toggleCreateGroup())} className="btn-ghost p-1.5 rounded-full">
-            <svg className="w-5 h-5 text-chat-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+  <div className="fixed inset-0 z-50 flex items-center justify-center px-3 sm:px-4 py-6">
+    
+    {/* Backdrop */}
+    <div
+      className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+      onClick={() => dispatch(toggleCreateGroup())}
+    />
+
+    {/* Modal */}
+    <div className="relative w-full max-w-md sm:max-w-lg bg-chat-header rounded-2xl shadow-2xl border border-chat-border/30 flex flex-col max-h-[90dvh]">
+
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 sm:px-5 h-14 border-b border-chat-border/20 flex-shrink-0">
+        <h2 className="text-sm sm:text-base font-semibold text-chat-text flex-1">
+          Create Group
+        </h2>
+        <button
+          onClick={() => dispatch(toggleCreateGroup())}
+          className="btn-ghost p-2 rounded-full"
+        >
+          <svg className="w-5 h-5 text-chat-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto">
 
         <div className="p-4 space-y-3">
+
           {/* Group Name */}
           <input
             autoFocus
@@ -81,7 +98,7 @@ const CreateGroupModal = () => {
             placeholder="Group name"
             value={groupName}
             onChange={(e) => setGroupName(e.target.value)}
-            className="input-field"
+            className="input-field w-full"
           />
 
           {/* Selected Members */}
@@ -94,7 +111,9 @@ const CreateGroupModal = () => {
                   className="flex items-center gap-1.5 bg-primary-500/20 border border-primary-500/30 text-primary-400 px-2.5 py-1 rounded-full text-xs"
                 >
                   <Avatar src={u.avatar} name={u.name} size="xs" />
-                  {u.name.split(' ')[0]}
+                  <span className="truncate max-w-[80px]">
+                    {u.name.split(' ')[0]}
+                  </span>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -109,25 +128,30 @@ const CreateGroupModal = () => {
             placeholder="Add people..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-field"
+            className="input-field w-full"
           />
         </div>
 
         {/* User List */}
-        <div className="max-h-52 overflow-y-auto border-t border-chat-border/20">
+        <div className="max-h-60 sm:max-h-72 overflow-y-auto border-t border-chat-border/20">
           {users.map(u => (
             <button
               key={u._id}
               onClick={() => toggleSelect(u)}
-              className="w-full flex items-center gap-3 px-5 py-3 hover:bg-chat-hover transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 sm:px-5 py-3 hover:bg-chat-hover transition-colors text-left"
             >
               <Avatar src={u.avatar} name={u.name} size="sm" />
-              <div className="flex-1">
-                <p className="text-sm font-medium text-chat-text">{u.name}</p>
-                <p className="text-xs text-chat-secondary">{u.email}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-chat-text truncate">
+                  {u.name}
+                </p>
+                <p className="text-xs text-chat-secondary truncate">
+                  {u.email}
+                </p>
               </div>
+
               {selected.find(s => s._id === u._id) && (
-                <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0">
                   <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
@@ -136,20 +160,24 @@ const CreateGroupModal = () => {
             </button>
           ))}
         </div>
-
-        {/* Create Button */}
-        <div className="p-4 border-t border-chat-border/20">
-          <button
-            onClick={handleCreate}
-            disabled={creating || !groupName.trim() || selected.length < 2}
-            className="btn-primary w-full"
-          >
-            {creating ? 'Creating...' : `Create Group (${selected.length} members)`}
-          </button>
-        </div>
       </div>
+
+      {/* Footer Button */}
+      <div className="p-4 border-t border-chat-border/20 flex-shrink-0">
+        <button
+          onClick={handleCreate}
+          disabled={creating || !groupName.trim() || selected.length < 2}
+          className="btn-primary w-full py-2.5 sm:py-3 text-sm sm:text-base"
+        >
+          {creating
+            ? 'Creating...'
+            : `Create Group (${selected.length} members)`}
+        </button>
+      </div>
+
     </div>
-  );
+  </div>
+);
 };
 
 export default CreateGroupModal;

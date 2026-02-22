@@ -1,7 +1,16 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { getInitials, getAvatarColor } from '../../utils/helpers';
 
-const Avatar = ({ src, name = '', size = 'md', showOnline = false, isOnline = false, className = '' }) => {
+const Avatar = ({
+  src,
+  name = '',
+  size = 'md',
+  showOnline = false,
+  isOnline = false,
+  className = '',
+}) => {
+  const [imgError, setImgError] = useState(false);
+
   const sizes = {
     xs: 'w-7 h-7 text-xs',
     sm: 'w-9 h-9 text-sm',
@@ -18,30 +27,43 @@ const Avatar = ({ src, name = '', size = 'md', showOnline = false, isOnline = fa
     xl: 'w-4 h-4',
   };
 
+  // Safe fallback if wrong size passed
+  const resolvedSize = sizes[size] ? size : 'md';
+
+  const initials = useMemo(() => {
+    return getInitials(name || 'User');
+  }, [name]);
+
+  const avatarColor = useMemo(() => {
+    return getAvatarColor(name || 'User');
+  }, [name]);
+
   return (
-    <div className={`relative flex-shrink-0 ${className}`}>
-      {src ? (
+    <div className={`relative inline-flex flex-shrink-0 ${className}`}>
+      {src && !imgError ? (
         <img
           src={src}
-          alt={name}
-          className={`${sizes[size]} rounded-full object-cover`}
+          alt={name || 'Avatar'}
+          loading="lazy"
+          onError={() => setImgError(true)}
+          className={`${sizes[resolvedSize]} rounded-full object-cover`}
         />
       ) : (
         <div
-          className={`${sizes[size]} ${getAvatarColor(name)} rounded-full flex items-center justify-center font-semibold text-white`}
+          className={`${sizes[resolvedSize]} ${avatarColor} rounded-full flex items-center justify-center font-semibold text-white select-none`}
         >
-          {getInitials(name)}
+          {initials}
         </div>
       )}
 
       {showOnline && (
         <span
-          className={`absolute bottom-0 right-0 ${dotSizes[size]} rounded-full border-2 border-chat-sidebar
-            ${isOnline ? 'bg-primary-500' : 'bg-chat-secondary'}`}
+          className={`absolute bottom-0 right-0 ${dotSizes[resolvedSize]} rounded-full border-2 border-chat-sidebar
+            ${isOnline ? 'bg-green-500' : 'bg-gray-400'}`}
         />
       )}
     </div>
   );
 };
 
-export default Avatar;
+export default React.memo(Avatar);

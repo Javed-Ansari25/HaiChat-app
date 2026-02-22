@@ -2,19 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ───────────────── Base Layer ───────────────── */
+
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
   }
 
   body {
     @apply bg-chat-bg text-chat-text font-sans;
     overflow: hidden;
-    height: 100vh;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Text selection */
+  ::selection {
+    @apply bg-primary-500 text-white;
+  }
+
+  /* Scrollbar */
   ::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
   }
 
   ::-webkit-scrollbar-track {
@@ -24,57 +42,120 @@
   ::-webkit-scrollbar-thumb {
     @apply bg-chat-border rounded-full;
   }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary-500;
+  }
 }
+
+/* ───────────────── Component Layer ───────────────── */
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-primary-500 hover:bg-primary-600 active:scale-[0.98]
+    text-white font-medium px-4 py-2 rounded-lg
+    transition-all duration-200
+    disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-ghost {
-    @apply hover:bg-chat-hover text-chat-text px-3 py-2 rounded-lg transition-colors;
+    @apply hover:bg-chat-hover active:scale-[0.97]
+    text-chat-text px-3 py-2 rounded-lg
+    transition-all duration-200;
   }
 
   .input-field {
-    @apply bg-chat-input border-0 rounded-lg px-4 py-2.5 text-chat-text placeholder-chat-secondary outline-none focus:ring-2 focus:ring-primary-500 w-full;
+    @apply bg-chat-input border border-transparent
+    rounded-lg px-4 py-2.5 text-chat-text
+    placeholder-chat-secondary outline-none
+    focus:ring-2 focus:ring-primary-500
+    focus:border-primary-500
+    w-full transition-all duration-200;
   }
 
   /* Message bubbles */
   .msg-sent {
-    @apply bg-chat-sent text-chat-text rounded-tl-2xl rounded-tr-sm rounded-bl-2xl rounded-br-2xl px-3 py-2;
+    @apply bg-chat-sent text-chat-text
+    rounded-tl-2xl rounded-tr-sm
+    rounded-bl-2xl rounded-br-2xl
+    px-3 py-2 message-in;
   }
 
   .msg-received {
-    @apply bg-chat-received text-chat-text rounded-tl-sm rounded-tr-2xl rounded-bl-2xl rounded-br-2xl px-3 py-2;
+    @apply bg-chat-received text-chat-text
+    rounded-tl-sm rounded-tr-2xl
+    rounded-bl-2xl rounded-br-2xl
+    px-3 py-2 message-in;
   }
 
   /* Typing animation */
   .typing-dot {
-    @apply w-2 h-2 rounded-full bg-chat-secondary animate-bounce;
+    @apply w-2 h-2 rounded-full bg-chat-secondary;
+    animation: typingBounce 1.2s infinite ease-in-out;
   }
 
   /* Online indicator */
   .online-dot {
-    @apply w-3 h-3 rounded-full bg-primary-500 border-2 border-chat-sidebar;
+    @apply w-3 h-3 rounded-full bg-primary-500
+    border-2 border-chat-sidebar;
+  }
+
+  /* Panel slide animation */
+  .slide-in {
+    animation: slideIn 0.25s ease forwards;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.2s ease forwards;
+  }
+
+  .message-in {
+    animation: messageIn 0.15s ease forwards;
   }
 }
 
-/* Custom animations */
+/* ───────────────── Animations ───────────────── */
+
 @keyframes slideIn {
-  from { transform: translateX(-100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes messageIn {
-  from { opacity: 0; transform: scale(0.95) translateY(4px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
-.slide-in { animation: slideIn 0.25s ease; }
-.fade-in { animation: fadeIn 0.2s ease; }
-.message-in { animation: messageIn 0.15s ease; }
+@keyframes typingBounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
