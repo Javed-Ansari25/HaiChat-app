@@ -6,7 +6,7 @@ export const initSocket = (token) => {
   if (socket?.connected) return socket;
   const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 
-  socket = io(SOCKET_URL, {
+  socket = io(import.meta.env.VITE_API_URL, {
     auth: { token },
     withCredentials: true,
     transports: ['websocket', 'polling'],

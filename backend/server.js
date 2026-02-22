@@ -32,8 +32,7 @@ app.use(
   cors({
     origin: [
       'http://localhost:5173',
-      'https://hai-chat-app.vercel.app',
-      'https://hai-chat-app-git-main-javedansari2k09-2089s-projects.vercel.app',
+      'https://hai-chat-app.vercel.app'
     ],
     credentials: true,
   }),
