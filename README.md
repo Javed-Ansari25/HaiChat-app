@@ -13,8 +13,6 @@ Experience real-time messaging, AI features, and group chats live.
 
 ---
 
----
-
 ## ✨ Features
 
 | Category | Features |
