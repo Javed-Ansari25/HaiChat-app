@@ -4,6 +4,17 @@ A modern, real-time chat application built with the MERN stack + Socket.IO. Feat
 
 ---
 
+## 🌍 Live 
+
+🚀 **Frontend (Vercel):**  
+👉 https://hai-chat-app.vercel.app/
+
+Experience real-time messaging, AI features, and group chats live.
+
+---
+
+---
+
 ## ✨ Features
 
 | Category | Features |
