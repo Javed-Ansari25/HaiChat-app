@@ -124,33 +124,8 @@ const PublicRoute = ({ children }) => {
 const App = () => {
   const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   dispatch(getMe());
-  // }, [dispatch]);
-
   useEffect(() => {
-    let isMounted = true;
-
-    const initAuth = async () => {
-      try {
-        await dispatch(getMe()).unwrap();
-      } catch (err) {
-        // slice already handles initialized = true
-      }
-    };
-
-    initAuth();
-
-    const timeout = setTimeout(() => {
-      if (isMounted) {
-        dispatch({ type: 'auth/getMe/rejected' });
-      }
-    }, 8000);
-
-    return () => {
-      isMounted = false;
-      clearTimeout(timeout);
-    };
+    dispatch(getMe());
   }, [dispatch]);
 
   return (

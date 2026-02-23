@@ -12,7 +12,8 @@ export const initSocket = (token) => {
     transports: ['websocket', 'polling'],
   });
 
-  socket.on('connect', () => console.log('🔌 Socket connected:', socket.id));
+  // socket.on('connect', () => console.log('🔌 Socket connected:', socket.id));
+  socket.on('connect', () => console.log('🔌 Socket connected'));
   socket.on('disconnect', () => console.log('🔌 Socket disconnected'));
   socket.on('connect_error', (err) => console.error('Socket error:', err.message));
 
