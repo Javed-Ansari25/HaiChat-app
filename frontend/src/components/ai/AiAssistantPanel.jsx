@@ -170,7 +170,7 @@ const AiAssistantPanel = () => {
               }`}
             >
               <p className="whitespace-pre-wrap leading-relaxed">
-                {msg.content}
+                {msg.isError ? 'Something went wrong' : msg.content}
               </p>
             </div>
           </div>

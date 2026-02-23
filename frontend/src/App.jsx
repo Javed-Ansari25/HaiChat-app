@@ -1,5 +1,11 @@
 import React, { useEffect, Component } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getMe } from './store/slices/authSlice';
 import { LoginPage, RegisterPage } from './pages/AuthPage';
@@ -16,7 +22,7 @@ const AppLoader = () => (
           fill="currentColor"
           viewBox="0 0 24 24"
         >
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/>
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z" />
         </svg>
       </div>
 
@@ -47,8 +53,12 @@ class ErrorBoundary extends Component {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
               </svg>
             </div>
 
@@ -114,8 +124,33 @@ const PublicRoute = ({ children }) => {
 const App = () => {
   const dispatch = useDispatch();
 
+  // useEffect(() => {
+  //   dispatch(getMe());
+  // }, [dispatch]);
+
   useEffect(() => {
-    dispatch(getMe());
+    let isMounted = true;
+
+    const initAuth = async () => {
+      try {
+        await dispatch(getMe()).unwrap();
+      } catch (err) {
+        // slice already handles initialized = true
+      }
+    };
+
+    initAuth();
+
+    const timeout = setTimeout(() => {
+      if (isMounted) {
+        dispatch({ type: 'auth/getMe/rejected' });
+      }
+    }, 8000);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeout);
+    };
   }, [dispatch]);
 
   return (
