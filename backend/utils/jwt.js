@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 
-/**
- * Generate JWT token and set it as HttpOnly cookie
- */
+/*
+  Generate JWT token and set it as HttpOnly cookie
+*/
 const generateTokenAndSetCookie = (res, userId) => {
   const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
@@ -18,9 +18,9 @@ const generateTokenAndSetCookie = (res, userId) => {
   return token;
 };
 
-/**
+/*
  * Verify JWT token
- */
+*/
 const verifyToken = (token) => {
   return jwt.verify(token, process.env.JWT_SECRET);
 };

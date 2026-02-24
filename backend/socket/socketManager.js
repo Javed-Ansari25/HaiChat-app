@@ -2,10 +2,10 @@ const { Server } = require('socket.io');
 const { verifyToken } = require('../utils/jwt');
 const User = require('../models/User');
 
-let io;
+let io;  
+
 // Map: userId -> Set of socketIds (user can have multiple tabs/devices)
 const onlineUsers = new Map();
-
 const initSocket = (server) => {
   io = new Server(server, {
     cors: {
@@ -42,7 +42,6 @@ const initSocket = (server) => {
 
   io.on('connection', async (socket) => {
     const userId = socket.userId;
-    // console.log(`🔌 User connected: ${socket.user.name} (${socket.id})`);
 
     // Track online status
     if (!onlineUsers.has(userId)) {
@@ -58,8 +57,7 @@ const initSocket = (server) => {
 
     // JOIN CHAT ROOM
     socket.on('join_chat', (chatId) => {
-      socket.join(chatId);
-    // console.log(`👥 ${socket.user.name} joined chat: ${chatId}`);
+      socket.join(chatId)
     });
 
     socket.on('leave_chat', (chatId) => {
@@ -86,12 +84,10 @@ const initSocket = (server) => {
 
     // DISCONNECT
     socket.on('disconnect', async () => {
-    // console.log(`🔌 User disconnected: ${socket.user.name}`);
       const userSockets = onlineUsers.get(userId);
-
       if (userSockets) {
         userSockets.delete(socket.id);
-
+        
         if (userSockets.size === 0) {
           onlineUsers.delete(userId);
           // All connections closed - mark as offline
@@ -107,10 +103,9 @@ const initSocket = (server) => {
           });
         }
 
-      }
+      } 
     });
   });
-
   console.log('🔥 Socket.IO initialized');
   return io;
 };

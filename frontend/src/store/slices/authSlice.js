@@ -102,7 +102,7 @@ const authSlice = createSlice({
       .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
-        state.initialized = true; // ✅ important
+        state.initialized = true; // important
       })
       .addCase(register.rejected, rejected)
 
@@ -111,7 +111,7 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
-        state.initialized = true; // ✅ important
+        state.initialized = true; // important
       })
       .addCase(login.rejected, rejected)
 
@@ -132,7 +132,7 @@ const authSlice = createSlice({
       })
       .addCase(getMe.rejected, (state) => {
         state.loading = false;
-        state.initialized = true; // ✅ very important
+        state.initialized = true; // very important
         state.user = null;
       })
 

@@ -1,9 +1,9 @@
 const User = require('../models/User');
 const { verifyToken } = require('../utils/jwt');
 
-/**
- * Protect routes - verify JWT from cookie or Authorization header
- */
+/*
+  Protect routes - verify JWT from cookie or Authorization header
+*/
 const protect = async (req, res, next) => {
   let token;
 

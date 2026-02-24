@@ -5,7 +5,7 @@ const { generateTokenAndSetCookie } = require('../utils/jwt');
  * @desc    Register a new user
  * @route   POST /api/auth/register
  * @access  Public
- */
+*/
 const register = async (req, res) => {
   const { name, email, password } = req.body;
 
