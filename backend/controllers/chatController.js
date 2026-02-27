@@ -9,35 +9,44 @@ const Message = require('../models/Message');
  */
 const accessChat = async (req, res) => {
   const { userId } = req.body;
+  const currentUserId = req.user._id;
 
   if (!userId) {
-    return res.status(400).json({ message: 'UserId is required' });
+    return res.status(400).json({ message: "UserId is required" });
   }
 
-  // Check if chat already exists
-  let chat = await Chat.findOne({
-    isGroupChat: false,
-    participants: { $all: [req.user._id, userId] },
-  })
-    .populate('participants', '-password')
+  let participants;
+
+  // Self chat
+  if (userId.toString() === currentUserId.toString()) {
+    participants = [currentUserId];
+  } else {
+    participants = [currentUserId, userId];
+  }
+
+  let chat = await Chat.findOneAndUpdate(
+    {
+      isGroupChat: false,
+      participants: { $size: participants.length, $all: participants },
+    },
+    {
+      $setOnInsert: {
+        participants,
+        isGroupChat: false,
+      },
+    },
+    {
+      new: true,
+      upsert: true,
+    }
+  )
+    .populate("participants", "-password")
     .populate({
-      path: 'lastMessage',
-      populate: { path: 'sender', select: 'name avatar' },
+      path: "lastMessage",
+      populate: { path: "sender", select: "name avatar" },
     });
 
-  if (chat) {
-    return res.json({ success: true, chat });
-  }
-
-  // Create new chat
-  chat = await Chat.create({
-    participants: [req.user._id, userId],
-    isGroupChat: false,
-  });
-
-  chat = await Chat.findById(chat._id).populate('participants', '-password');
-
-  res.status(201).json({ success: true, chat });
+  res.status(200).json({ success: true, chat });
 };
 
 /**
@@ -65,7 +74,7 @@ const getMyChats = async (req, res) => {
  * @route   POST /api/chats/group
  * @access  Private
  */
-const createGroupChat = async (req, res) => {
+const createGroupChat = async (req, res) => {   
   const { groupName, participants } = req.body;
 
   if (!groupName || !participants || participants.length < 2) {
@@ -75,7 +84,7 @@ const createGroupChat = async (req, res) => {
   const allParticipants = [...new Set([...participants, req.user._id.toString()])];
 
   const chat = await Chat.create({
-    isGroupChat: true,
+    isGroupChat: true, 
     groupName,
     participants: allParticipants,
     groupAdmin: req.user._id,

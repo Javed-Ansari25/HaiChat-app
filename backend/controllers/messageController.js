@@ -45,9 +45,17 @@ const sendMessage = async (req, res) => {
   let message = await Message.create(msgData);
 
   // Populate sender info
-  message = await Message.findById(message._id)
-    .populate('sender', 'name avatar')
-    .populate({ path: 'replyTo', populate: { path: 'sender', select: 'name' } });
+  // message = await Message.findById(message._id)
+  //   .populate('sender', 'name avatar')
+  //   .populate({ path: 'replyTo', populate: { path: 'sender', select: 'name' } });
+
+  await message.populate([
+    { path: 'sender', select: 'name avatar' },
+    { 
+      path: 'replyTo',
+      populate: { path: 'sender', select: 'name' }
+    }
+  ]);
 
   // Update chat's lastMessage
   await Chat.findByIdAndUpdate(chatId, { lastMessage: message._id });
@@ -77,61 +85,91 @@ const sendMessage = async (req, res) => {
  * @route   GET /api/messages/:chatId
  * @access  Private
  */
-const getMessages = async (req, res) => {
-  const { chatId } = req.params;
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 30;
-  const skip = (page - 1) * limit;
+const getMessages = async (req, res) => { 
+  try {
+    const { chatId } = req.params;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit) || 30, 50); // max cap
+    const skip = (page - 1) * limit;
 
-  // Verify user is participant
-  const chat = await Chat.findOne({ _id: chatId, participants: req.user._id });
-  if (!chat) {
-    return res.status(403).json({ message: 'Access denied' });
-  }
+    // Verify participant (only check existence, no full doc needed)
+    const chatExists = await Chat.exists({
+      _id: chatId,
+      participants: req.user._id,
+    });
 
-  const messages = await Message.find({
-    chatId,
-    deletedFor: { $ne: req.user._id },
-    isDeleted: false,
-  })
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .populate('sender', 'name avatar')
-    .populate({ path: 'replyTo', populate: { path: 'sender', select: 'name' } });
-
-  const total = await Message.countDocuments({
-    chatId,
-    deletedFor: { $ne: req.user._id },
-    isDeleted: false,
-  });
-
-  // Mark messages as seen
-  await Message.updateMany(
-    {
-      chatId,
-      sender: { $ne: req.user._id },
-      'seenBy.user': { $ne: req.user._id },
-    },
-    {
-      $addToSet: { seenBy: { user: req.user._id, seenAt: new Date() } },
+    if (!chatExists) {
+      return res.status(403).json({ message: "Access denied" });
     }
-  );
 
-  // Notify others that messages were seen
-  const io = getIO();
-  io.to(chatId).emit('messages_seen', { chatId, userId: req.user._id });
+    const baseQuery = {
+      chatId,
+      deletedFor: { $ne: req.user._id },
+      isDeleted: false,
+    };
 
-  res.json({
-    success: true,
-    messages: messages.reverse(), // Return in chronological order
-    pagination: {
-      page,
-      limit,
-      total,
-      pages: Math.ceil(total / limit),
-    },
-  });
+    // Run messages + count in parallel
+    const [messages, total] = await Promise.all([
+      Message.find(baseQuery)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("sender", "name avatar")
+        .populate({
+          path: "replyTo",
+          populate: { path: "sender", select: "name" },
+        })
+        .lean(), // returns plain JS objects
+
+      Message.countDocuments(baseQuery),
+    ]);
+
+    // Mark unseen messages as seen (only latest batch)
+    const unseenMessageIds = messages
+      .filter(
+        (msg) =>
+          msg.sender._id.toString() !== req.user._id.toString() &&
+          !msg.seenBy?.some(
+            (s) => s.user.toString() === req.user._id.toString()
+          )
+      )
+      .map((msg) => msg._id);
+
+    if (unseenMessageIds.length > 0) {
+      await Message.updateMany(
+        { _id: { $in: unseenMessageIds } },
+        {
+          $addToSet: {
+            seenBy: {
+              user: req.user._id,
+              seenAt: new Date(),
+            },
+          },
+        }
+      );
+
+      // notify room only if something changed
+      const io = getIO();
+      io.to(chatId).emit("messages_seen", {
+        chatId,
+        userId: req.user._id,
+      });
+    }
+
+    return res.json({
+      success: true,
+      messages: messages.reverse(),
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 /**
@@ -177,8 +215,9 @@ const deleteMessage = async (req, res) => {
  */
 const markAsSeen = async (req, res) => {
   const { chatId } = req.params;
+  if (!chatId) return res.status(400).json({ error: "ChatId required" });
 
-  await Message.updateMany(
+  const result = await Message.updateMany(
     {
       chatId,
       sender: { $ne: req.user._id },
@@ -190,7 +229,9 @@ const markAsSeen = async (req, res) => {
   );
 
   const io = getIO();
-  io.to(chatId).emit('messages_seen', { chatId, userId: req.user._id });
+  if (result.modifiedCount > 0) {
+    io.to(chatId).emit('messages_seen', { chatId, userId: req.user._id });
+  }
 
   res.json({ success: true });
 };
