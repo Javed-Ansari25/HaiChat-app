@@ -80,7 +80,7 @@ const sendMessage = async (req, res) => {
 const getMessages = async (req, res) => {
   const { chatId } = req.params;
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 50;
+  const limit = parseInt(req.query.limit) || 30;
   const skip = (page - 1) * limit;
 
   // Verify user is participant

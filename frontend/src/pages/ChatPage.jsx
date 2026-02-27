@@ -24,7 +24,7 @@ const ChatPage = () => {
     showChatInfo,
     showAiAssistant,
     isMobile,
-    showSidebar
+    showSidebar,
   } = useSelector((s) => s.ui);
 
   // ─── Initialize socket
@@ -46,7 +46,6 @@ const ChatPage = () => {
 
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-chat-bg relative">
-
       {/* ─── Sidebar Overlay for Mobile */}
       {isMobile && showSidebar && (
         <div
@@ -56,18 +55,20 @@ const ChatPage = () => {
       )}
 
       {/* Sidebar */}
-{showSidebarPanel && (
-  <div
-    className={`
+      {showSidebarPanel && (
+        <div
+          className={`
       ${isMobile ? 'fixed inset-0 z-40 bg-black/40 backdrop-blur-sm flex justify-start' : 'w-80'}
       h-full
     `}
-  >
-    <div className={`${isMobile ? 'w-full max-w-xs sm:max-w-sm' : ''} h-full bg-chat-sidebar relative`}>
-      <Sidebar />
-    </div>
-  </div>
-)}
+        >
+          <div
+            className={`${isMobile ? 'w-full max-w-xs sm:max-w-sm' : ''} h-full bg-chat-sidebar relative`}
+          >
+            <Sidebar />
+          </div>
+        </div>
+      )}
 
       {/* ─── Main Chat Area */}
       {showChatPanel && (
@@ -124,7 +125,6 @@ const ChatPage = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
